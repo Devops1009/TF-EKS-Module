@@ -1,0 +1,9 @@
+Needed file to deploy app load balancer
+- create kubernetes role [rbac-role]
+- deploy alb ingress controller
+- deploy certmanager
+- deploy app deployment
+- deploy app service
+- deploy ingress
+
+####All important and nesessarry file present in this dir

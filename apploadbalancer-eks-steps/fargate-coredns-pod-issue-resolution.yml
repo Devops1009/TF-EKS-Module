@@ -1,0 +1,23 @@
+CoreDNS does not run on AWS Fargate by default
+Posted: Monday 29 March 2021 @ 11:11:57
+
+AWS Fargate is a serverless container scheduler that can be used with AWS EKS to run Kubernetes pods without the need to worry about provisioning and managing node capacity within the cluster. When EKS is configured with AWS Fargate Profiles, pods matching the selector are automatically scheduled by Fargate. When they're matched, the pods receive a new annotation: eks.amazonaws.com/computer-type: fargate.
+
+Annotations:         CapacityProvisioned: 0.25vCPU 0.5GB
+                     Logging: LoggingDisabled: LOGGING_CONFIGMAP_NOT_FOUND
+                     eks.amazonaws.com/compute-type: fargate
+                     kubectl.kubernetes.io/restartedAt: 2021-03-29T12:29:26+01:00
+                     kubernetes.io/psp: eks.privileged
+It's this new annotation which ultimately tells Kubernetes to use the Fargate scheduler for the pod.
+
+When you spin up a Kubernetes cluster with EKS, it provisions CoreDNS for you by default. The deployment it creates defines some annotations in its pod template, including eks.amazonaws.com/computer-type: ec2. That annotation with a value of ec2 tells EKS to schedule the pods on nodes running on EC2, not Fargate.
+
+Unfortunately, creating a Fargate profile with a selector that matches the CoreDNS pods won't override that annotation, and thus the pods won't be scheduled by Fargate. If you have no nodes on EC2, the pods will stay in the PENDING state forever.
+
+To mitigate this, you can patch the CoreDNS deployment after the EKS cluster is created, to replace the annotation value with fargate
+
+kubectl patch deployment coredns \
+    -n kube-system \
+    --type json \
+    -p='[{"op": "replace", "path": "/spec/template/metadata/annotations/eks.amazonaws.com~1compute-type", "value": "fargate"}]'
+This isn't the prettiest solution, but it does work. Another solution could be to define your own CoreDNS deployment with all of the correct values, and use kubectl apply to fix it up.
