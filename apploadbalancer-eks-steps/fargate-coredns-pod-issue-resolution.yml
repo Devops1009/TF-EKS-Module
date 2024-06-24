@@ -21,3 +21,11 @@ kubectl patch deployment coredns \
     --type json \
     -p='[{"op": "replace", "path": "/spec/template/metadata/annotations/eks.amazonaws.com~1compute-type", "value": "fargate"}]'
 This isn't the prettiest solution, but it does work. Another solution could be to define your own CoreDNS deployment with all of the correct values, and use kubectl apply to fix it up.
+
+
+Other option follow aws link
+
+Also make sure for farget works only private nw so make sure u need to attached nat gateway to your private subnet route .
+
+https://docs.aws.amazon.com/eks/latest/userguide/view-kubernetes-resources.html#view-kubernetes-resources-permissions
+
