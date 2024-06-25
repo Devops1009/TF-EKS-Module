@@ -29,3 +29,5 @@ Also make sure for farget works only private nw so make sure u need to attached 
 
 https://docs.aws.amazon.com/eks/latest/userguide/view-kubernetes-resources.html#view-kubernetes-resources-permissions
 
+kubectl rollout restart -n kube-system deployment/coredns
+
